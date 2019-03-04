@@ -1,26 +1,25 @@
-FROM alpine:latest
+FROM debian:stretch
 
-MAINTAINER Luc Perkins <lperkins@linuxfoundation.org>
+MAINTAINER WilliamGuo <shaowei3608@gmail.com>
 
-RUN apk add --no-cache \
-    curl \
-    git \
-    openssh-client \
-    rsync
+# Install pygments (for syntax highlighting)
+RUN apt-get -qq update \
+	&& DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends libstdc++6 python-pygments git ca-certificates asciidoc curl \
+	&& rm -rf /var/lib/apt/lists/*
 
+# Configuration variables
 ARG HUGO_VERSION
+ENV HUGO_BINARY hugo_extended_${HUGO_VERSION}_Linux-64bit.deb
+ENV SITE_DIR '/src'
 
-RUN mkdir -p /usr/local/src && \
-    cd /usr/local/src && \
-    curl -L https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-64bit.tar.gz | tar -xz && \
-    apk add build-base && \
-    apk add libc6-compat && \
-    mv hugo /usr/local/bin/hugo && \
-    curl -L https://bin.equinox.io/c/dhgbqpS8Bvy/minify-stable-linux-amd64.tgz | tar -xz && \
-    mv minify /usr/local/bin && \
-    addgroup -Sg 1000 hugo && \
-    adduser -Sg hugo -u 1000 -h /src hugo
+# Download and install hugo
+RUN curl -sL -o /tmp/hugo.deb \
+    https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/${HUGO_BINARY} && \
+    dpkg -i /tmp/hugo.deb && \
+    rm /tmp/hugo.deb && \
+    mkdir ${SITE_DIR}
 
-WORKDIR /src
+WORKDIR ${SITE_DIR}
 
+# Expose default hugo port
 EXPOSE 1313

@@ -1,4 +1,4 @@
-HUGO_VERSION = 0.47.1
+HUGO_VERSION = 0.54.0
 
 DOCKER_IMAGE = 360cloud/hugo
 
